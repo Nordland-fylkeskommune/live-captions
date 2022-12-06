@@ -9,7 +9,7 @@ if (!import.meta.env.VITE_SONIX_API_KEY)
 const sonix = new Sonix(
   {
     message: 'Authorization',
-    api_key: import.meta.env.VITE_SONIX_WS_URI,
+    api_key: import.meta.env.VITE_SONIX_API_KEY,
     language: 'en',
     name: 'API Conference',
     partials: true,
