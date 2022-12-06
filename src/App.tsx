@@ -3,9 +3,9 @@ import reactLogo from './assets/react.svg';
 import './App.css';
 import { Sonix, TranscriptComponent } from './lib/sonix';
 
-if (!import.meta.env.VITE_SONIX_WS_URI) throw new Error('SONIX_WS_URI not set');
+if (!import.meta.env.VITE_SONIX_WS_URI) throw new Error('VITE_SONIX_WS_URI not set');
 if (!import.meta.env.VITE_SONIX_API_KEY)
-  throw new Error('SONIX_API_KEY not set');
+  throw new Error('VITE_SONIX_API_KEY not set');
 const sonix = new Sonix(
   {
     message: 'Authorization',
