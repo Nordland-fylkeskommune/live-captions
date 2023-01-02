@@ -86,7 +86,7 @@ export class Sonix {
   }
   sendAudio(audio: Blob) {
     console.log('Sending audio');
-    this.ws?.send(audio);
+    if (this.mediaId !== null) this.ws?.send(audio);
   }
   endStream() {
     const msg: ClientEndStreamMessage = {
@@ -109,10 +109,13 @@ export class Sonix {
 
 export const TranscriptComponent = ({ sonix }: { sonix: Sonix }) => {
   const [transcript, setTranscript] = useState('');
-
+  const [textLimit, setTextLimit] = useState(100);
   useEffect(() => {
     sonix.transcript.onTranscript = (text) => {
-      setTranscript(text);
+      // Limit the text to 50 characters
+      if (text.length > textLimit) {
+        setTranscript(text.slice(text.length - textLimit));
+      }
     };
   }, []);
   return (

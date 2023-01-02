@@ -1,4 +1,4 @@
-export type Languages = 'en' | 'no';
+export type Languages = 'en' | 'nb-NO';
 
 export type Word = {
   start_time: number;
