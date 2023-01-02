@@ -1,13 +1,9 @@
 import {
   ClientAuthorizationMessage,
   ClientEndStreamMessage,
-  ServerAuthorizationMessage,
-  ServerEndOfTranscriptMessage,
   ServerMessage,
-  ServerTranscriptionMessage,
 } from './types/sonix';
-import ws from 'ws';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Microphone } from './Microphone';
 export class Transcript {
   text: string;
