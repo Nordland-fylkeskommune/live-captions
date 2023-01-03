@@ -5,23 +5,37 @@ import {
 } from './types/sonix';
 import { useEffect, useState } from 'react';
 import { Microphone } from './Microphone';
+// import { EventEmitter } from 'events';
+
+let EventEmitter = EventTarget;
+declare interface TranscriptEmitter {
+  on(event: 'transcript', listener: (text: string) => void): this;
+  on(event: string, listener: Function): this;
+}
+
 export class Transcript {
   text: string;
   partial: string;
-  onTranscript?: (text: string) => void;
-  constructor(onTranscript?: (text: string) => void) {
+  emitter: EventTarget;
+  constructor() {
     this.text = '';
     this.partial = '';
-    if (onTranscript) this.onTranscript = onTranscript;
+    class TranscriptEmitter extends EventEmitter {}
+    this.emitter = new TranscriptEmitter();
   }
 
   addText(text: string) {
     this.text += text;
     this.clearPartial();
-    if (this.onTranscript) this.onTranscript(this.text);
+    this.emitter.dispatchEvent(
+      new CustomEvent('transcript', { detail: this.text }),
+    );
   }
   setPartial(text: string) {
     this.partial = text;
+    this.emitter.dispatchEvent(
+      new CustomEvent('partial', { detail: this.partial }),
+    );
   }
   clearPartial() {
     this.partial = '';
@@ -105,20 +119,34 @@ export class Sonix {
 
 export const TranscriptComponent = ({ sonix }: { sonix: Sonix }) => {
   const [transcript, setTranscript] = useState('');
-  const [textLimit, setTextLimit] = useState(100);
+  const [maxSentences, setMaxSentences] = useState(2);
+  const [partial, setPartial] = useState('');
   useEffect(() => {
-    sonix.transcript.onTranscript = (text) => {
-      // Limit the text to 50 characters
-      if (text.length > textLimit) {
-        setTranscript(text.slice(text.length - textLimit));
-      }
-    };
+    sonix.transcript.emitter.addEventListener('transcript', (e) => {
+      setTranscript((e as CustomEvent).detail);
+    });
+    sonix.transcript.emitter.addEventListener('partial', (e) => {
+      setPartial((e as CustomEvent).detail);
+    });
   }, []);
+  // sentence is a group of words ending in a period, question mark, or exclamation point and followed by a space and a capital letter.
+  let sliceSentences = (text: string) => {
+    let sentences = text.split(/(?<=[.?!])\s+(?=[a-z])/gi);
+    return sentences
+      .slice(Math.max(sentences.length - maxSentences, 0))
+      .join(' ');
+  };
   return (
     <div>
-      <p>{transcript}</p>
+      <p>{sliceSentences(transcript)}</p>
+      <p>{partial}</p>
       <button onClick={() => sonix.start()}>Start</button>
       <button onClick={() => sonix.stop()}>End</button>
+      <input
+        type="number"
+        value={maxSentences}
+        onChange={(e) => setMaxSentences(parseInt(e.target.value))}
+      />
     </div>
   );
 };
